@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import com.example.guessit.R
 import androidx.databinding.DataBindingUtil
 import com.example.guessit.databinding.ScoreFragmentBinding
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
 
 
 class ScoreFragment : Fragment() {
@@ -22,15 +24,15 @@ class ScoreFragment : Fragment() {
         )
 
         // Get args using by navArgs property delegate
-//        val scoreFragmentArgs by navArgs<ScoreFragmentArgs>()
-//        binding.scoreText.text = scoreFragmentArgs.score.toString()
-//        binding.playAgainButton.setOnClickListener { onPlayAgain() }
+        val scoreFragmentArgs by navArgs<ScoreFragmentArgs>()
+        binding.scoreText.text = scoreFragmentArgs.score.toString()
+        binding.playAgainButton.setOnClickListener { onPlayAgain() }
 
         return binding.root
     }
 
     private fun onPlayAgain() {
-//        findNavController().navigate(ScoreFragmentDirections.actionRestart())
+        findNavController().navigate(ScoreFragmentDirections.actionScoreFragmentToGameFragment())
     }
 
 }

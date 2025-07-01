@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.example.guessit.R
 import androidx.databinding.DataBindingUtil
 import com.example.guessit.databinding.GameFragmentBinding
+import androidx.navigation.fragment.findNavController
 
 
 class GameFragment : Fragment() {
@@ -51,24 +52,6 @@ class GameFragment : Fragment() {
             "queen",
             "hospital",
             "basketball",
-            "cat",
-            "change",
-            "snail",
-            "soup",
-            "calendar",
-            "sad",
-            "desk",
-            "guitar",
-            "home",
-            "railway",
-            "zebra",
-            "jelly",
-            "car",
-            "crow",
-            "trade",
-            "bag",
-            "roll",
-            "bubble"
         )
         wordList.shuffle()
     }
@@ -77,8 +60,8 @@ class GameFragment : Fragment() {
      * Called when the game is finished
      */
     private fun gameFinished() {
-//        val action = GameFragmentDirections.actionGameToScore(score)
-//        findNavController(this).navigate(action)
+        val action = GameFragmentDirections.actionGameFragmentToScoreFragment(score)
+        findNavController().navigate(action)
     }
 
     /**
