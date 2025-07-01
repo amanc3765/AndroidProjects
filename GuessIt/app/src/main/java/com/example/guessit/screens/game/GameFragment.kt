@@ -1,28 +1,25 @@
 package com.example.guessit.screens.game
 
 import android.os.Bundle
+import android.text.format.DateUtils
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.guessit.R
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.guessit.databinding.GameFragmentBinding
 import androidx.navigation.fragment.findNavController
 
 
 class GameFragment : Fragment() {
 
-    // The current word
-    private var word = ""
-
-    // The current score
-    private var score = 0
-
-    // The list of words - the front of the list is the next word to guess
-    private lateinit var wordList: MutableList<String>
-
     private lateinit var binding: GameFragmentBinding
+
+    private lateinit var viewModel: GameViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -33,72 +30,45 @@ class GameFragment : Fragment() {
             inflater, R.layout.game_fragment, container, false
         )
 
-        resetList()
-        nextWord()
+        Log.i("GameViewModel", "Called ViewModelProvider")
+        viewModel = ViewModelProvider(this)[GameViewModel::class.java]
 
-        binding.correctButton.setOnClickListener { onCorrect() }
-        binding.skipButton.setOnClickListener { onSkip() }
-        updateScoreText()
-        updateWordText()
+        binding.correctButton.setOnClickListener {
+            viewModel.onCorrect()
+        }
+        binding.skipButton.setOnClickListener {
+            viewModel.onSkip()
+        }
+
+        viewModel.score.observe(
+            viewLifecycleOwner, Observer { newScore ->
+                binding.scoreText.text = newScore.toString()
+            })
+        viewModel.word.observe(
+            viewLifecycleOwner, Observer { newWord -> binding.wordText.text = newWord })
+        viewModel.eventGameFinish.observe(
+            viewLifecycleOwner, Observer { hasFinish ->
+                if (hasFinish) {
+                    gameFinished()
+                    viewModel.onGameFinishComplete()
+                }
+            })
+        viewModel.currentTime.observe(viewLifecycleOwner, Observer { newTime ->
+            binding.timerText.text = DateUtils.formatElapsedTime(newTime)
+        })
+
         return binding.root
 
-    }
-
-    /**
-     * Resets the list of words and randomizes the order
-     */
-    private fun resetList() {
-        wordList = mutableListOf(
-            "queen",
-            "hospital",
-            "basketball",
-        )
-        wordList.shuffle()
     }
 
     /**
      * Called when the game is finished
      */
     private fun gameFinished() {
-        val action = GameFragmentDirections.actionGameFragmentToScoreFragment(score)
+        val action =
+            GameFragmentDirections.actionGameFragmentToScoreFragment(viewModel.score.value ?: 0)
         findNavController().navigate(action)
-    }
-
-    /**
-     * Moves to the next word in the list
-     */
-    private fun nextWord() {
-        //Select and remove a word from the list
-        if (wordList.isEmpty()) {
-            gameFinished()
-        } else {
-            word = wordList.removeAt(0)
-        }
-        updateWordText()
-        updateScoreText()
-    }
-
-    /** Methods for buttons presses **/
-
-    private fun onSkip() {
-        score--
-        nextWord()
-    }
-
-    private fun onCorrect() {
-        score++
-        nextWord()
-    }
-
-    /** Methods for updating the UI **/
-
-    private fun updateWordText() {
-        binding.wordText.text = word
-
-    }
-
-    private fun updateScoreText() {
-        binding.scoreText.text = score.toString()
+        Log.i("GameFragment", "Game finished.")
     }
 
 }
